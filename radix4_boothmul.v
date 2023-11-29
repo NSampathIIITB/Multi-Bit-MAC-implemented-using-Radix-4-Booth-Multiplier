@@ -6,6 +6,10 @@ module p#(parameter DATA_WIDTH = 16, OUT_WIDTH = 32)
 
 output reg [OUT_WIDTH-1:0] c, //output of 64 bits
 
+//output reg [OUT_WIDTH-1:0] c1,
+
+output reg done,
+
 input clk,
 
 input rst //reset
@@ -49,6 +53,7 @@ initial begin
     y<='d0;
     b1<='d0;
     c<='d0;
+    done<=0;
 end
 
 always@(posedge clk)
@@ -59,16 +64,19 @@ begin
 c=0;
 i=0;
 y=0;
+done<=0;
 end
 
 if(rst==0 && i<count)// when reset is 0 we begin the operation
 
 begin
+//done<=0;
 if(rst==0)
 begin
 b1={b,1'b0};     // concatenated multiplier with 0 at LSB bit
 if(i<count)
 begin
+//done<=0;
 j={b1[2*i+2],b1[2*i+1],b1[2*i]};  // 3 bits taken from the multiplier(b1) from LSB
 
 case(j)          //compared with the booth radix 4 table and multiplied respectively with the 
@@ -99,6 +107,11 @@ y1={{v{y[p]}},y};// sign extension of the msb bit of y to get the 64 bits partia
 c=c+(y1*(4**i));     //partial products summed up and stored in output(c)
 i=i+1;               //increment of the number of x
 //$display("y1 = %b,y=%b,a=%b,j=%b,count=%d,i=%d", y1,y,a,j,count,i);
+
+if(i==count)
+begin
+done<=1;
+end
 end
 end
 end
